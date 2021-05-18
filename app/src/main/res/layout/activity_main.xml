@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:background="#3F51B5"
+        android:padding="10dp"
+        android:textColor="@color/white"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Firebase Auth Login"
+         />
+    <com.facebook.login.widget.LoginButton
+        android:layout_width="match_parent"
+        android:id="@+id/fb_login"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        />
+    <Button
+        android:id="@+id/google_login"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/purple_700"
+        android:text="LOGIN WITH GOOGLE"
+        android:textColor="@color/white"
+        android:layout_margin="10dp"
+        />
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
+
+</LinearLayout>
