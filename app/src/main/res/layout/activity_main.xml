@@ -39,6 +39,7 @@
         android:hint="Enter Phone With Country Code"
         />
     <Button
+        android:id="@+id/send_otp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
@@ -54,10 +55,11 @@
         android:hint="Enter OTP"
         />
     <Button
+        android:id="@+id/verify_otp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
-        android:text="SEND OTP"
+        android:text="VERIFY OTP"
         android:textColor="@color/white"
         android:background="#E91E63"
         />
