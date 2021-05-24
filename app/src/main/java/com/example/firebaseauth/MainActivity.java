@@ -9,7 +9,13 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -19,6 +25,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
@@ -29,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int GOOGLE_SIGN_IN_REQUEST = 112;
     FirebaseAuth auth;
+    CallbackManager callbackManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +45,51 @@ public class MainActivity extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance();
         InitializeGoogleLogin();
+        InitializeFacebook();
+        InitializeOTPLogin();
+    }
+
+    private void InitializeFacebook() {
+        LoginButton fb_login = findViewById(R.id.fb_login);
+        callbackManager = CallbackManager.Factory.create();
+
+        fb_login.setPermissions("email","public_profile");
+        fb_login.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                Log.d("Facebook", "On Success");
+                handleFacebookLogin(loginResult);
+            }
+
+            @Override
+            public void onCancel() {
+                Log.d("Facebook", "On Cancel");
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+                Log.d("Facebook", "On Error");
+            }
+        });
+    }
+
+    private void handleFacebookLogin (LoginResult loginResult){
+        AuthCredential credential = FacebookAuthProvider.getCredential(loginResult.getAccessToken().getToken());
+
+        auth.signInWithCredential(credential)
+                .addOnCompleteListener(MainActivity.this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull @NotNull Task<AuthResult> task) {
+                        if(task.isSuccessful()){
+                            FirebaseUser user = auth.getCurrentUser();
+                            SendUserData(user);
+                            Log.d("Login","Success");
+                        }
+                        else {
+                            Log.d("Login","Error");
+                        }
+                    }
+                });
     }
 
     private void InitializeGoogleLogin() {
@@ -50,6 +103,12 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void InitializeOTPLogin(){
+        Button sendOtp = findViewById(R.id.send_otp);
+        Button verifyOtp = findViewById(R.id.verify_otp);
+        EditText phoneInput = findViewById(R.id.phone_input);
+        EditText otpInput = findViewById(R.id.otp_input);
+    }
     private void DoGoogleLogin() {
 
         //creating google sigining option object
@@ -81,6 +140,9 @@ public class MainActivity extends AppCompatActivity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+        else {
+            callbackManager.onActivityResult(requestCode,resultCode,data);
         }
     }
     private void  processFirebaseLoginStep(String token)
