@@ -23,20 +23,26 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseException;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.auth.PhoneAuthCredential;
+import com.google.firebase.auth.PhoneAuthProvider;
 
 import org.jetbrains.annotations.NotNull;
+
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int GOOGLE_SIGN_IN_REQUEST = 112;
     FirebaseAuth auth;
     CallbackManager callbackManager;
+    String verificationOtp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,6 +114,58 @@ public class MainActivity extends AppCompatActivity {
         Button verifyOtp = findViewById(R.id.verify_otp);
         EditText phoneInput = findViewById(R.id.phone_input);
         EditText otpInput = findViewById(R.id.otp_input);
+
+        sendOtp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendOtpCode(phoneInput.getText().toString());
+            }
+        });
+
+        verifyOtp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                verifyOtp(otpInput.getText().toString());
+            }
+        });
+    }
+    private void sendOtpCode(String phone){
+        PhoneAuthProvider.OnVerificationStateChangedCallbacks callbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+            @Override
+            public void onVerificationCompleted(@NonNull @NotNull PhoneAuthCredential phoneAuthCredential) {
+                Log.d("Success","Verified");
+            }
+
+            @Override
+            public void onVerificationFailed(@NonNull @NotNull FirebaseException e) {
+                Log.d("Success","Failed");
+                e.printStackTrace();
+
+            }
+
+            @Override
+            public void onCodeSent(@NonNull @NotNull String verifyToke, @NonNull @NotNull PhoneAuthProvider.ForceResendingToken forceResendingToken) {
+                verificationOtp = verifyToke;
+                PhoneAuthProvider.ForceResendingToken token = forceResendingToken;
+            }
+        };
+        PhoneAuthProvider
+                .getInstance()
+                .verifyPhoneNumber(phone,60, TimeUnit.SECONDS,MainActivity.this,callbacks);
+    }
+    private void verifyOtp(String otp){
+        PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationOtp,otp);
+
+        auth.signInWithCredential(credential)
+                .addOnCompleteListener(MainActivity.this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull @NotNull Task<AuthResult> task) {
+                        if(task.isSuccessful()){
+                            FirebaseUser user = task.getResult().getUser();
+                            SendUserData(user);
+                        }
+                    }
+                });
     }
     private void DoGoogleLogin() {
 
